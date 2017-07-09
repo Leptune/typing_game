@@ -29,7 +29,7 @@ function getRandInt(min, max) {
 
 function monsterDown(word) {
 	// return;
-	var randomSpeed = getRandInt(300, 3000);
+	var randomSpeed = getRandInt(400, 4000);
 	intervals[word] = setInterval(function(tmpWord) {
 		try {
 			var tmpObj = $('.monster-col[data-word='+tmpWord+']');
@@ -113,8 +113,6 @@ function genMonster(monsterNum) {
 function hideMonster(word) {
 	var tmpObj = $('.monster-living[data-word='+word+']');
 	tmpObj.removeClass('monster-living').addClass('magictime vanishOut');
-	clearInterval(intervals[word]);
-	target = null
 }
 
 function searchTarget(key) {
@@ -146,15 +144,22 @@ function shoot(targetKey) {
 	$('#'+bulletId).css($('.game-me').offset());
 	var offset = targetKey.offset();
 	offset.left -= 79;
-	$('#'+bulletId).animate(offset, 1000, function() {
+	offset.top -= 15;
+	$('#'+bulletId).animate(offset, 3000, function() {
 		$(this).hide();
-		$('#' + $(this).data('target-id')).css('color', '#ec3b83');
+		var obj = $('#' + $(this).data('target-id'));
+		obj.css('color', '#ec3b83').addClass('colored');
+		var tmpTarget = obj.closest('monster-col');
+		if (!tmpTarget.find('.monster-letter.undone').length && tmpTarget.find('.monster-letter.done').length == tmpTarget.find('.monster-letter.colored').length) {
+			hideMonster(tmpTarget.data('word'))
+		}
 	});
 	if (!target.find('.monster-letter.undone').length) {
-		hideMonster(target.data('word'))
-		if (!$('.monster-living').length) {
-			throw new ExceptionSuccess();
-		}
+		clearInterval(intervals[word]);
+		target = null
+	}
+	if (!$('.monster-living').length) {
+		throw new ExceptionSuccess();
 	}
 }
 
