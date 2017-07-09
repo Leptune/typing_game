@@ -1,0 +1,39 @@
+.body-preview {
+  border: solid 1px pink;
+}
+body {
+  background: #ddd;
+}
+.game-top {
+  top: 5vh;
+  height: 90vh;
+  background: #000;
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  color: #ccff00;
+}
+.game-top .monster-col {
+  padding: 3px;
+  background: #000;
+}
+.game-top .monster-col .monster {
+  position: relative;
+  border: solid 1px #fdee00;
+  padding: 3px;
+  border-radius: 5px;
+}
+.game-top .bullet {
+  color: red;
+  margin-left: 2%;
+  position: absolute;
+  top: 79vh;
+}
+.game-bottom {
+  border: solid 1px #f0f590;
+  position: relative;
+}
+.game-bottom .game-me {
+  background: #ccff00;
+  height: 5px;
+}
