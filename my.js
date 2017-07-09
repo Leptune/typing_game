@@ -40,7 +40,9 @@ function monsterDown(word) {
 			var selfHeight = parseInt(tmpObj.css('height'));
 			if (top > gameHeight-selfHeight) { // 碰到了底部
 				hideMonster(tmpWord);
-				throw new ExceptionFail(); // 游戏失败
+				if (!tmpObj.hasClass('died')) {
+					throw new ExceptionFail(); // 游戏失败
+				}
 			}
 		} catch (e) {
 			handleException(e);
@@ -112,7 +114,10 @@ function genMonster(monsterNum) {
 
 function hideMonster(word) {
 	var tmpObj = $('.monster-living[data-word='+word+']');
-	tmpObj.removeClass('monster-living').addClass('magictime vanishOut');
+	// 加入消失效果
+	var magics = ['magic', 'puffOut', 'puffOut', 'vanishOut', 'openDownLeftOut', 'openDownRightOut', 'openUpLeftOut', 'openUpRightOut', 'rotateDown', 'rotateUp', 'rotateLeft', 'rotateRight', 'swashOut', 'foolishOut', 'holeOut', 'tinRightOut', 'tinLeftOut', 'tinUpOut', 'tinDownOut', 'bombRightOut', 'bombLeftOut', 'boingOutDown', 'spaceOutUp', 'spaceOutRight', 'spaceOutDown', 'spaceOutLeft'];
+	var magic = magics[getRandInt(0, magics.length - 1)];
+	tmpObj.removeClass('monster-living').addClass('magictime ' + magic);
 }
 
 function searchTarget(key) {
@@ -140,22 +145,40 @@ function shoot(targetKey) {
 	var targetKeyId = targetKey.attr('id');
 
 	targetKey.removeClass('undone').addClass('done');
-	$('.game-top').append('<div class="bullet" id="' + bulletId + '" data-target-id="' + targetKeyId + '">' + key + '</div>')
+	$('.game-top').append('<div class="bullet" data-word="' + word + '" id="' + bulletId + '" data-target-id="' + targetKeyId + '">' + key + '</div>')
 	$('#'+bulletId).css($('.game-me').offset());
 	var offset = targetKey.offset();
 	offset.left -= 79;
-	offset.top -= 15;
-	$('#'+bulletId).animate(offset, 3000, function() {
-		$(this).hide();
-		var obj = $('#' + $(this).data('target-id'));
-		obj.css('color', '#ec3b83').addClass('colored');
-		var tmpTarget = obj.closest('monster-col');
-		if (!tmpTarget.find('.monster-letter.undone').length && tmpTarget.find('.monster-letter.done').length == tmpTarget.find('.monster-letter.colored').length) {
-			hideMonster(tmpTarget.data('word'))
+
+
+	$('#'+bulletId).animate(offset, {
+	    duration: 1000,
+	    specialEasing: {
+	      width: "linear",
+	      height: "easeOutBounce"
+	    },
+	    complete: function() {
+      		var obj = $('#' + $(this).data('target-id'));
+      		obj.css('color', '#ec3b83').addClass('colored');
+      		var tmpTarget = obj.closest('.monster-col');
+      		// 所有字母都消灭后, 停止循环器, 并隐藏单词
+      		if (!tmpTarget.find('.monster-letter.undone').length && tmpTarget.find('.monster-letter.done').length == tmpTarget.find('.monster-letter.colored').length) {
+      			$('.bullet[data-word=' + tmpTarget.data('word') + ']').hide();
+      			hideMonster(tmpTarget.data('word'))
+      			clearInterval(intervals[word]);
+      		}
+	    },
+	    step: function(now, fx) { // 让子弹临近目标时隐藏
+	    	var obj = $('#' + fx.elem.id);
+	    	var tmpTarget = $('#' + obj.data('target-id')).closest('.monster-col');
+			if (tmpTarget.position().top + 20 >= obj.position().top) {
+	    		obj.hide();
+			}
 		}
 	});
+
 	if (!target.find('.monster-letter.undone').length) {
-		clearInterval(intervals[word]);
+		target.addClass('died');
 		target = null
 	}
 	if (!$('.monster-living').length) {
@@ -183,8 +206,10 @@ function clearAllInterval() {
 
 function handleException(e) {
 	if (e instanceof ExceptionNoTarget) {
+		console.log(target)
 		// do nothing
 	} else if (e instanceof ExceptionNotMatch) {
+		console.log(target)
 		// do nothing
 	} else if (e instanceof ExceptionSuccess) {
 		alert('You Win!! Wonderful!!!');

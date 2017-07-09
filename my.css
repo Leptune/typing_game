@@ -28,6 +28,7 @@ body {
   margin-left: 2%;
   position: absolute;
   top: 79vh;
+  z-index: 99999;
 }
 .game-bottom {
   border: solid 1px #f0f590;
