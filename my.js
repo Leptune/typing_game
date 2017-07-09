@@ -158,12 +158,13 @@ function shoot(targetKey) {
 	      height: "easeOutBounce"
 	    },
 	    complete: function() {
+	    	$(this).hide();
       		var obj = $('#' + $(this).data('target-id'));
       		obj.css('color', '#ec3b83').addClass('colored');
       		var tmpTarget = obj.closest('.monster-col');
       		// 所有字母都消灭后, 停止循环器, 并隐藏单词
       		if (!tmpTarget.find('.monster-letter.undone').length && tmpTarget.find('.monster-letter.done').length == tmpTarget.find('.monster-letter.colored').length) {
-      			$('.bullet[data-word=' + tmpTarget.data('word') + ']').hide();
+      			// $('.bullet[data-word=' + tmpTarget.data('word') + ']').hide();
       			hideMonster(tmpTarget.data('word'))
       			clearInterval(intervals[word]);
       		}
