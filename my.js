@@ -29,7 +29,7 @@ function getRandInt(min, max) {
 
 function monsterDown(word) {
 	// return;
-	var randomSpeed = getRandInt(400, 4000);
+	var randomSpeed = getRandInt(400, 6000);
 	intervals[word] = setInterval(function(tmpWord) {
 		try {
 			var tmpObj = $('.monster-col[data-word='+tmpWord+']');
@@ -40,7 +40,7 @@ function monsterDown(word) {
 			var selfHeight = parseInt(tmpObj.css('height'));
 			if (top > gameHeight-selfHeight) { // 碰到了底部
 				hideMonster(tmpWord);
-				if (!tmpObj.hasClass('died')) {
+				if (tmpObj.hasClass('monster-living')) {
 					throw new ExceptionFail(); // 游戏失败
 				}
 			}
@@ -99,7 +99,12 @@ function genMonster(monsterNum) {
 		var monsterWord;
 		for (var i = 0; i < monsterNum; i++) {
 			monsterWord = getRandomWord();
-			monsterObj = $('<div class="col-md-1 col-xs-1 monster-col monster-living" data-word="'+monsterWord+'" data-index="'+monsterCount+'"><span class="monster"></div>');
+			var offsetStr = '';
+			// var offset = getRandInt(0, 1);
+			// if (offset != 0) {
+			// 	offsetStr = 'col-md-offset-' + offset + ' col-xs-offset-' + offset;
+			// }
+			monsterObj = $('<div class="' + offsetStr + 'col-md-1 col-xs-1 monster-col monster-living" data-word="'+monsterWord+'" data-index="'+monsterCount+'"><span class="monster"></div>');
 			for (var j = 0; j < monsterWord.length; j++) {
 				monsterObj.find('.monster').append('<font class="monster-letter undone ' + monsterWord[j] + '" id="word-'+monsterWord+'-'+j+'">' + monsterWord[j] + '</font>');
 			}
@@ -113,11 +118,11 @@ function genMonster(monsterNum) {
 }
 
 function hideMonster(word) {
-	var tmpObj = $('.monster-living[data-word='+word+']');
+	var tmpObj = $('.monster-col[data-word='+word+']');
 	// 加入消失效果
 	var magics = ['magic', 'puffOut', 'puffOut', 'vanishOut', 'openDownLeftOut', 'openDownRightOut', 'openUpLeftOut', 'openUpRightOut', 'rotateDown', 'rotateUp', 'rotateLeft', 'rotateRight', 'swashOut', 'foolishOut', 'holeOut', 'tinRightOut', 'tinLeftOut', 'tinUpOut', 'tinDownOut', 'bombRightOut', 'bombLeftOut', 'boingOutDown', 'spaceOutUp', 'spaceOutRight', 'spaceOutDown', 'spaceOutLeft'];
 	var magic = magics[getRandInt(0, magics.length - 1)];
-	tmpObj.removeClass('monster-living').addClass('magictime ' + magic);
+	tmpObj.addClass('magictime ' + magic);
 }
 
 function searchTarget(key) {
@@ -150,6 +155,13 @@ function shoot(targetKey) {
 	var offset = targetKey.offset();
 	offset.left -= 79;
 
+	if (!target.find('.monster-letter.undone').length) {
+		target.removeClass('monster-living').addClass('died');
+		target = null
+	}
+	if (!$('.monster-living').length) {
+		throw new ExceptionSuccess();
+	}
 
 	$('#'+bulletId).animate(offset, {
 	    duration: 1000,
@@ -164,7 +176,7 @@ function shoot(targetKey) {
       		var tmpTarget = obj.closest('.monster-col');
       		// 所有字母都消灭后, 停止循环器, 并隐藏单词
       		if (!tmpTarget.find('.monster-letter.undone').length && tmpTarget.find('.monster-letter.done').length == tmpTarget.find('.monster-letter.colored').length) {
-      			// $('.bullet[data-word=' + tmpTarget.data('word') + ']').hide();
+      			$('.bullet[data-word=' + tmpTarget.data('word') + ']').hide();
       			hideMonster(tmpTarget.data('word'))
       			clearInterval(intervals[word]);
       		}
@@ -172,19 +184,11 @@ function shoot(targetKey) {
 	    step: function(now, fx) { // 让子弹临近目标时隐藏
 	    	var obj = $('#' + fx.elem.id);
 	    	var tmpTarget = $('#' + obj.data('target-id')).closest('.monster-col');
-			if (tmpTarget.position().top + 20 >= obj.position().top) {
+			if (tmpTarget.position().top >= obj.position().top) {
 	    		obj.hide();
 			}
 		}
 	});
-
-	if (!target.find('.monster-letter.undone').length) {
-		target.addClass('died');
-		target = null
-	}
-	if (!$('.monster-living').length) {
-		throw new ExceptionSuccess();
-	}
 }
 
 function attackMonster(key) {
@@ -216,7 +220,7 @@ function handleException(e) {
 		alert('You Win!! Wonderful!!!');
 		clearAllInterval();
 	} else if (e instanceof ExceptionFail) {
-		// alert('You Die!!!');
+		alert('You Die!!!');
 		clearAllInterval();
 	}
 }
@@ -225,7 +229,7 @@ $(document).ready(function(){
 	genMonster();
 	intervals['___init___'] = setInterval(function() {
 		genMonster(1);
-	}, 2000);
+	}, 3000);
 	$(document).on('keypress', function(e) {
 		try {
 			var key = String.fromCharCode(e.which);

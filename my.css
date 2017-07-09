@@ -15,9 +15,9 @@ body {
 }
 .game-top .monster-col {
   padding: 3px;
-  background: #000;
 }
 .game-top .monster-col .monster {
+  background: #000;
   position: relative;
   border: solid 1px #fdee00;
   padding: 3px;
