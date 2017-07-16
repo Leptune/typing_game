@@ -6,4 +6,4 @@
 http://leptune.coding.me/typing_practice/
 
 ## 截图
-![截图1](https://raw.githubusercontent.com/Leptune/typing_game/master/1.png)
+![截图1](https://raw.githubusercontent.com/Leptune/typing_game/master/1.gif)
